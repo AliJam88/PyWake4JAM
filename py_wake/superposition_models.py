@@ -189,3 +189,98 @@ class WeightedSum(SuperpositionModel):
 
                 count += 1
         return Us + np.sum(np.where(~Il, us, 0), axis=0)
+
+
+class CumulativeWakeSum(SuperpositionModel):
+    """
+    Cumulative
+    """
+    def __init__(self, alpha=2., ):
+        self.alpha = alpha
+
+    def __call__(self, WS0_xxx, WS_eff_xxx, ct_xxx, D_xx, sigma_sqr_jxxx, cw_jxxx, hcw_jxxx, dh_jxxx):
+
+        U0 = WS0_xxx
+        WS_eff = WS_eff_xxx
+        ct = ct_xxx
+        D = D_xx
+        # C = C_jxxx
+        sigma_sqr = sigma_sqr_jxxx
+        downwind = (sigma_sqr > 1e-10)
+        sigma_sqr[~downwind] = 1.
+        cw = cw_jxxx * np.ones_like(sigma_sqr)
+        hcw = hcw_jxxx * np.ones_like(sigma_sqr)
+        dh = dh_jxxx * np.ones_like(sigma_sqr)
+        C = np.zeros_like(sigma_sqr)
+
+        n_wt = sigma_sqr.shape[0]
+        lamCsum = np.zeros(sigma_sqr.shape[1:])
+        for n in range(n_wt):
+            if n > 0:
+                sigma_sqr_tot = sigma_sqr[n][na, ...] + sigma_sqr[:n]
+                lam = self.alpha * sigma_sqr[:n] / sigma_sqr_tot * np.exp(-(hcw[n][na, ...] - hcw[:n])**2 / (2. * sigma_sqr_tot)) * np.exp(-(dh[n][na, ...] - dh[:n])**2 / (2. * sigma_sqr_tot))
+                # Clim = (WS_eff_xxx * (1. - np.sqrt(np.maximum(0, 1. - ct))))[na, ...] * np.ones_like(sigma_sqr[-1])
+                lamCsum = np.sum(lam * C[:n], axis=0)
+            sqrt_term = (U0[n] - lamCsum)**2 - (ct[n] * D[n, ..., na]**2 * WS_eff[n]**2) / (8. * sigma_sqr[n])
+            sqrt_term[sqrt_term < 0.] = 0.
+            Clim = (WS_eff[n] * (1. - np.sqrt(np.maximum(0, 1. - ct[n])))) * np.ones_like(sigma_sqr[n])
+            C[n] = (U0[n] - lamCsum) - np.sqrt(sqrt_term)
+            C[n][(sqrt_term < 0.) | (C[n] > Clim)] = Clim[(sqrt_term < 0.) | (C[n] > Clim)]
+            C[n] = C[n] * downwind[n]
+
+        #Clim = (WS_eff_xxx * (1. - np.sqrt(np.maximum(0, 1. - ct))))[na, ...] * np.ones_like(sigma_sqr[-1])
+        #sqrt_term = Lsum**2 - (ct[na, ...] * D[na, ..., na]**2 * WS_eff_xxx[na, ...]**2) / (8. * sigma_sqr[-1])
+        #sqrt_term[sqrt_term < 0.] = 0.
+        #Cnew = Lsum - np.sqrt(sqrt_term)
+        #Cnew[(sqrt_term < 0.) | (Cnew > Clim)] = Clim[(sqrt_term < 0.) | (Cnew > Clim)]
+        exponent = -1 / (2 * sigma_sqr) * cw**2
+        # for j in range(n_wt):
+        #     lam[j] = sigma_sqr[-1] *
+        # cross_sigma_sqr = sigma_sqr
+        # lam = ((s[ii])/(s[n] + s[ii])) * np.exp(-((((y_t[n] - y_t[ii])*D)**2)/(2*(s[n]**2 + s[ii]**2)))) * np.exp(-(((z_t[n] - z_t[ii])**2)/(2*(s[n]**2 + s[ii]**2))))
+
+        # np.sum(value_jxxx, 0)
+
+        return np.sum(C * np.exp(exponent), axis=0)
+
+# class CumulativeWakeSum(SuperpositionModel):
+#     """
+#     Cumulative
+#     """
+#     def __init__(self, alpha=2.):
+#         self.alpha = alpha
+
+#     def __call__(self, WS0_xxx, WS_eff_xxx, ct_xxx, D_xx, C_jxxx, sigma_sqr_jxxx, cw_jxxx, hcw_jxxx, dh_jxxx):
+
+#         U0 = WS0_xxx
+#         WS_eff = WS_eff_xxx
+#         ct = ct_xxx
+#         D = D_xx
+#         C = C_jxxx
+#         sigma_sqr = sigma_sqr_jxxx
+#         cw = cw_jxxx * np.ones_like(sigma_sqr)
+#         hcw = hcw_jxxx * np.ones_like(sigma_sqr)
+#         dh = dh_jxxx * np.ones_like(sigma_sqr)
+
+#         n_wt = sigma_sqr.shape[0]
+#         if n_wt == 1:
+#             Lsum = U0 * np.ones_like(sigma_sqr[-1])
+#         else:
+#             sigma_sqr_cross = sigma_sqr[-1] * sigma_sqr[:-1]
+#             lam = self.alpha * sigma_sqr[:-1] / sigma_sqr_cross * np.exp(-(hcw_jxxx[-1] * hcw_jxxx[:-1])**2 / (2. * sigma_sqr_cross)) * np.exp(-(dh_jxxx[-1] * dh_jxxx[:-1])**2 / (2. * sigma_sqr_cross))
+#             Lsum = np.maximum(0, (U0 - np.sum(lam * C_jxxx, axis=0)))
+
+#         Clim = (WS_eff_xxx * (1. - np.sqrt(np.maximum(0, 1. - ct))))[na, ...] * np.ones_like(sigma_sqr[-1])
+#         sqrt_term = Lsum**2 - (ct[na, ...] * D[na, ..., na]**2 * WS_eff_xxx[na, ...]**2) / (8. * sigma_sqr[-1])
+#         sqrt_term[sqrt_term < 0.] = 0.
+#         Cnew = Lsum - np.sqrt(sqrt_term)
+#         Cnew[(sqrt_term < 0.) | (Cnew > Clim)] = Clim[(sqrt_term < 0.) | (Cnew > Clim)]
+#         exponent = -1 / (2 * sigma_sqr[-1]) * cw[-1]**2
+#         # for j in range(n_wt):
+#         #     lam[j] = sigma_sqr[-1] *
+#         # cross_sigma_sqr = sigma_sqr
+#         # lam = ((s[ii])/(s[n] + s[ii])) * np.exp(-((((y_t[n] - y_t[ii])*D)**2)/(2*(s[n]**2 + s[ii]**2)))) * np.exp(-(((z_t[n] - z_t[ii])**2)/(2*(s[n]**2 + s[ii]**2))))
+
+#         # np.sum(value_jxxx, 0)
+
+#         return Cnew * np.exp(exponent), Cnew
