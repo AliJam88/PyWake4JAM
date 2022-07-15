@@ -4,6 +4,7 @@ from py_wake.turbulence_models.turbulence_model import TurbulenceModel
 from py_wake.utils.area_overlapping_factor import AreaOverlappingFactor
 from py_wake.superposition_models import SqrMaxSum
 from py_wake.utils.gradients import cabs
+from py_wake.deficit_models.utils import a0
 
 
 class CrespoHernandez(TurbulenceModel, AreaOverlappingFactor):
@@ -16,12 +17,9 @@ class CrespoHernandez(TurbulenceModel, AreaOverlappingFactor):
     """
     args4addturb = ['dw_ijlk', 'cw_ijlk', 'D_src_il', 'ct_ilk', 'TI_ilk', 'D_dst_ijl', 'wake_radius_ijlk']
 
-    def __init__(self, a=0.73, b=0.8325, c=0.0325, d=0.32, addedTurbulenceSuperpositionModel=SqrMaxSum(), **kwargs):
+    def __init__(self, a=[0.73, 0.8325, 0.0325, 0.32], addedTurbulenceSuperpositionModel=SqrMaxSum(), **kwargs):
         TurbulenceModel.__init__(self, addedTurbulenceSuperpositionModel, **kwargs)
         self.a = a
-        self.b = b
-        self.c = c
-        self.d = d
 
     def calc_added_turbulence(self, dw_ijlk, cw_ijlk, D_src_il, ct_ilk, TI_ilk, D_dst_ijl, wake_radius_ijlk, **_):
         """ Calculate the added turbulence intensity at locations specified by
@@ -34,12 +32,12 @@ class CrespoHernandez(TurbulenceModel, AreaOverlappingFactor):
             Added turbulence intensity weighted by wake-turbine overlap [-]
         """
         # induction factor
-        a_ilk = 0.5 * (1 - np.sqrt(1 - ct_ilk))
+        a_ilk = a0(ct_ilk)
         a_ilk = np.maximum(a_ilk, 1e-10)  # avoid error in gradient of a_ilk**0.8325 > 0.8325*a_ilk**-.1675
         # added turbulence (Eq. 21)
         dw_ijlk_gt0 = np.maximum(dw_ijlk, 1e-10)  # avoid divide by zero and sqrt of negative number
-        TI_add_ijlk = self.a * a_ilk[:, na, :, :]**self.b * TI_ilk[:, na, :, :]**self.c * \
-            cabs(D_src_il[:, na, :, na] / dw_ijlk_gt0)**self.d * (dw_ijlk > 0)
+        TI_add_ijlk = self.a[0] * a_ilk[:, na, :, :]**self.a[1] * TI_ilk[:, na, :, :]**self.a[2] * \
+            cabs(D_src_il[:, na, :, na] / dw_ijlk_gt0)**self.a[3] * (dw_ijlk > 0)
 
         area_overlap_ijlk = self.overlapping_area_factor(wake_radius_ijlk, dw_ijlk, cw_ijlk, D_src_il, D_dst_ijl)
 

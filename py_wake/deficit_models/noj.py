@@ -7,7 +7,7 @@ from py_wake.turbulence_models.stf import STF2017TurbulenceModel
 from py_wake.deficit_models.gaussian import NiayifarGaussianDeficit
 from py_wake.deficit_models import DeficitModel
 from py_wake.utils.gradients import cabs
-
+from py_wake.deficit_models.utils import a0
 
 class NOJDeficit(NiayifarGaussianDeficit, AreaOverlappingFactor):
 
@@ -39,8 +39,7 @@ class NOJDeficit(NiayifarGaussianDeficit, AreaOverlappingFactor):
         if not self.deficit_initalized:
             self._calc_layout_terms(
                 WS_ilk, WS_eff_ilk, D_src_il, D_dst_ijl, dw_ijlk, cw_ijlk, ct_ilk=ct_ilk, **kwargs)
-        ct_ilk = np.minimum(ct_ilk, 1)   # treat ct_ilk for np.sqrt()
-        term_numerator_ilk = (1 - np.sqrt(1 - ct_ilk))
+        term_numerator_ilk = 2. * a0(ct_ilk)
         return term_numerator_ilk[:, na] * self.layout_factor_ijlk
 
     def wake_radius(self, D_src_il, dw_ijlk, **kwargs):

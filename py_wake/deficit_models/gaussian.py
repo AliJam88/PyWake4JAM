@@ -8,6 +8,7 @@ from py_wake.superposition_models import SquaredSum
 from py_wake.wind_farm_models.engineering_models import PropagateDownwind
 from py_wake.utils.gradients import cabs
 from py_wake.utils import gradients
+from py_wake.deficit_models.utils import a0
 
 
 class BastankhahGaussianDeficit(ConvectionDeficitModel):
@@ -40,19 +41,20 @@ class BastankhahGaussianDeficit(ConvectionDeficitModel):
         return self.k_ilk(**kwargs)[:, na] * dw_ijlk + \
             self.epsilon_ilk(ct_ilk)[:, na] * D_src_il[:, na, :, na]
 
-    def _calc_deficit(self, WS_ilk, WS_eff_ilk, D_src_il, dw_ijlk, ct_ilk, **kwargs):
+    def _calc_deficit(self, WS_ilk, WS_eff_ilk, D_src_il, dw_ijlk, cw_ijlk, ct_ilk, **kwargs):
         WS_ref_ilk = (WS_ilk, WS_eff_ilk)[self.use_effective_ws]
         # dimensional wake expansion
         sigma_sqr_ijlk = (self.sigma_ijlk(D_src_il, dw_ijlk, ct_ilk, **kwargs))**2
         # maximum added to avoid sqrt of negative number
-        radical_ijlk = np.maximum(0, (1. - ct_ilk[:, na] * D_src_il[:, na, :, na]**2 / (8. * sigma_sqr_ijlk)))
-        deficit_centre_ijlk = WS_ref_ilk[:, na] * (1. - np.sqrt(radical_ijlk)) * (dw_ijlk > 0)
+        # radical_ijlk = np.maximum(0, (1. - ct_ilk[:, na] * D_src_il[:, na, :, na]**2 / (8. * sigma_sqr_ijlk)))
+        # deficit_centre_ijlk = WS_ref_ilk[:, na] * (1. - np.sqrt(radical_ijlk)) * (dw_ijlk > 0)
+        deficit_centre_ijlk = WS_ref_ilk[:, na] * 2. * a0(ct_ilk[:, na] * D_src_il[:, na, :, na]**2 / (8. * sigma_sqr_ijlk)) * (dw_ijlk > 0)
 
-        return WS_ref_ilk, sigma_sqr_ijlk, deficit_centre_ijlk, radical_ijlk
+        return WS_ref_ilk, sigma_sqr_ijlk, deficit_centre_ijlk
 
     def calc_deficit(self, WS_ilk, WS_eff_ilk, D_src_il, dw_ijlk, cw_ijlk, ct_ilk, **kwargs):
-        _, sigma_sqr_ijlk, deficit_centre_ijlk, _ = self._calc_deficit(WS_ilk, WS_eff_ilk, D_src_il, dw_ijlk,
-                                                                       ct_ilk, **kwargs)
+        _, sigma_sqr_ijlk, deficit_centre_ijlk = self._calc_deficit(WS_ilk, WS_eff_ilk, D_src_il, dw_ijlk,
+                                                                    ct_ilk, **kwargs)
 
         # term inside exp()
         exponent_ijlk = -1 / (2 * sigma_sqr_ijlk) * cw_ijlk**2
@@ -68,11 +70,12 @@ class BastankhahGaussianDeficit(ConvectionDeficitModel):
 
     def calc_deficit_convection(self, WS_ilk, WS_eff_ilk, D_src_il, dw_ijlk, cw_ijlk, ct_ilk, **kwargs):
 
-        WS_ref_ilk, sigma_sqr_ijlk, deficit_centre_ijlk, radical_ijlk = self._calc_deficit(WS_ilk, WS_eff_ilk,
-                                                                                           D_src_il, dw_ijlk, ct_ilk,
-                                                                                           **kwargs)
+        WS_ref_ilk, sigma_sqr_ijlk, deficit_centre_ijlk = self._calc_deficit(WS_ilk, WS_eff_ilk,
+                                                                             D_src_il, dw_ijlk, ct_ilk,
+                                                                             **kwargs)
         # Convection velocity
-        uc_ijlk = WS_ref_ilk[:, na] * 0.5 * (1. + np.sqrt(radical_ijlk))
+        # uc_ijlk = WS_ref_ilk[:, na] * 0.5 * (1. + np.sqrt(radical_ijlk))
+        uc_ijlk = WS_ref_ilk[:, na] * (1. - a0(ct_ilk[:, na] * D_src_il[:, na, :, na]**2 / (8. * sigma_sqr_ijlk)))
 
         return deficit_centre_ijlk, uc_ijlk, sigma_sqr_ijlk
 
@@ -325,13 +328,10 @@ class ZongGaussianDeficit(NiayifarGaussianDeficit):
         # dimensional wake expansion rate
         sigma_sqr_ijlk = (self.sigma_ijlk(D_src_il, dw_ijlk, ct_ilk, **kwargs))**2
         ctx_ijlk = self.ct_func(ct_ilk, dw_ijlk, D_src_il)
-
-        radical_ijlk = np.maximum(0, (1. - ctx_ijlk * D_src_il[:, na, :, na]**2 / (8. * sigma_sqr_ijlk)))
-
         # Centreline deficit
-        deficit_centre_ijlk = WS_ref_ilk[:, na] * (1. - np.sqrt(radical_ijlk)) * (dw_ijlk > 0)
+        deficit_centre_ijlk = WS_ref_ilk[:, na] * 2. * a0(ctx_ijlk * D_src_il[:, na, :, na]**2 / (8. * sigma_sqr_ijlk)) * (dw_ijlk > 0)
 
-        return WS_ref_ilk, sigma_sqr_ijlk, deficit_centre_ijlk, radical_ijlk
+        return WS_ref_ilk, sigma_sqr_ijlk, deficit_centre_ijlk
 
 
 class ZongGaussian(PropagateDownwind):
