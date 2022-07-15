@@ -9,7 +9,7 @@ from py_wake.utils.gradients import cabs
 from py_wake.rotor_avg_models.area_overlap_model import AreaOverlapAvgModel
 from warnings import catch_warnings, filterwarnings
 from py_wake.deficit_models.deficit_model import WakeRadiusTopHat
-
+from py_wake.deficit_models.utils import a0
 
 class NOJDeficit(NiayifarGaussianDeficit, WakeRadiusTopHat):
 
@@ -37,9 +37,9 @@ class NOJDeficit(NiayifarGaussianDeficit, WakeRadiusTopHat):
 
     def calc_deficit(self, ct_ilk, **kwargs):
         if not self.deficit_initalized:
-            self._calc_layout_terms(ct_ilk=ct_ilk, **kwargs)
-        ct_ilk = np.minimum(ct_ilk, 1)   # treat ct_ilk for np.sqrt()
-        term_numerator_ilk = (1 - np.sqrt(1 - ct_ilk))
+            self._calc_layout_terms(
+                WS_ilk, WS_eff_ilk, D_src_il, D_dst_ijl, dw_ijlk, cw_ijlk, ct_ilk=ct_ilk, **kwargs)
+        term_numerator_ilk = 2. * a0(ct_ilk)
         return term_numerator_ilk[:, na] * self.layout_factor_ijlk
 
     def wake_radius(self, D_src_il, dw_ijlk, **kwargs):

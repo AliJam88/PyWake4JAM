@@ -4,7 +4,11 @@ from py_wake.deficit_models.deficit_model import DeficitModel
 from py_wake.deficit_models.no_wake import NoWakeDeficit
 from py_wake.deficit_models import BlockageDeficitModel
 from py_wake.utils.gradients import cabs
+<<<<<<< HEAD
 import warnings
+=======
+from py_wake.deficit_models.utils import a0
+>>>>>>> update of induction computation
 
 
 class SelfSimilarityDeficit(BlockageDeficitModel):
@@ -23,8 +27,6 @@ class SelfSimilarityDeficit(BlockageDeficitModel):
         self.ss_eta = ss_eta
         self.ss_alpha = ss_alpha
         self.ss_beta = ss_beta
-        # coefficients for BEM approximation by Madsen (1997)
-        self.a0p = np.array([0.2460, 0.0586, 0.0883])
         # limiter for singularities
         self.limiter = limiter
         self.exclude_wake = exclude_wake
@@ -59,15 +61,12 @@ class SelfSimilarityDeficit(BlockageDeficitModel):
         a0f_ijlk = (1. + x_ijlk / np.sqrt(1. + x_ijlk**2))
         return a0f_ijlk
 
-    def a0(self, x_ijlk, ct_ilk):
+    def a00(self, x_ijlk, ct_ilk):
         """
         BEM axial induction approximation by Madsen (1997). Here the effective
         CT is used instead, which is gamma*CT as shown in Eq. (8) in [1].
         """
-        gamma_ct_ilk = self.ss_gamma * ct_ilk
-        # a0_ilk = self.a0p[2] * gamma_ct_ilk**3 + self.a0p[1] * gamma_ct_ilk**2 + self.a0p[0] * gamma_ct_ilk
-        a0_ilk = gamma_ct_ilk * (self.a0p[0] + gamma_ct_ilk * (self.a0p[1] + self.a0p[2] * gamma_ct_ilk))
-        return a0_ilk[:, na]
+        return a0(self.ss_gamma * ct_ilk)[:, na]
 
     def _calc_layout_terms(self, dw_ijlk, cw_ijlk, D_src_il, **_):
         # radial shape function
@@ -90,7 +89,7 @@ class SelfSimilarityDeficit(BlockageDeficitModel):
             self.feps_ijlk = self.f_eps(x_ijlk, cw_ijlk, R_ijlk)
             self.a0f_ijlk = self.a0f(x_ijlk)
 
-        a0x_ijlk = self.a0(x_ijlk, ct_ilk) * self.a0f_ijlk
+        a0x_ijlk = self.a00(x_ijlk, ct_ilk) * self.a0f_ijlk
         # deficit
         deficit_ijlk = WS_ilk[:, na] * a0x_ijlk * self.feps_ijlk
         deficit_ijlk = np.negative(deficit_ijlk, out=deficit_ijlk, where=dw_ijlk > 0)  # deficit[dw] = -deficit[dw]
@@ -135,8 +134,6 @@ class SelfSimilarityDeficit2020(SelfSimilarityDeficit):
         # cofficients for the near- and farfield approximations of gamma
         self.ngp = ngp
         self.fgp = fgp
-        # coefficients for BEM approximation by Madsen (1997)
-        self.a0p = np.array([0.2460, 0.0586, 0.0883])
         # limiter for singularities
         self.limiter = limiter
         self.exclude_wake = exclude_wake
@@ -174,15 +171,13 @@ class SelfSimilarityDeficit2020(SelfSimilarityDeficit):
         finter_ijlk = np.where(x_ijlk > -1, 0., finter_ijlk)
         return finter_ijlk
 
-    def a0(self, x_ijlk, ct_ilk):
+    def a00(self, x_ijlk, ct_ilk):
         """
         BEM axial induction approximation by Madsen (1997). Here the effective
         CT is used instead, which is gamma*CT as shown in Eq. (8) in [1].
         """
         gamma_ct_ijlk = self.gamma(x_ijlk, ct_ilk) * ct_ilk[:, na]
-        # a0_ijlk = self.a0p[2] * gamma_ct_ijlk**3 + self.a0p[1] * gamma_ct_ijlk**2 + self.a0p[0] * gamma_ct_ijlk
-        a0_ijlk = ((self.a0p[2] * gamma_ct_ijlk + self.a0p[1]) * gamma_ct_ijlk + self.a0p[0]) * gamma_ct_ijlk
-        return a0_ijlk
+        return a0(gamma_ct_ijlk)
 
     def gamma(self, x_ijlk, ct_ilk):
         """
