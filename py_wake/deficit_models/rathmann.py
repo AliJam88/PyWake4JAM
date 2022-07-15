@@ -112,8 +112,6 @@ class RathmannScaled(Rathmann):
                  rotorAvgModel=None, groundModel=None, upstream_only=False):
         BlockageDeficitModel.__init__(self, upstream_only=upstream_only, superpositionModel=superpositionModel,
                                       rotorAvgModel=rotorAvgModel, groundModel=groundModel)
-        # coefficients for BEM approximation by Madsen (1997)
-        self.a0p = np.array([0.2460, 0.0586, 0.0883])
         # limiter to avoid singularities
         self.limiter = limiter
         # coefficient for scaling the effective forcing
