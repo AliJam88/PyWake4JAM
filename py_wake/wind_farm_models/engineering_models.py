@@ -59,16 +59,10 @@ class EngineeringWindFarmModel(WindFarmModel):
                 setattr(model, 'windFarmModel', self)
             setattr(self, name, model)
 
-<<<<<<< HEAD
         if isinstance(superpositionModel, WeightedSum):
             assert isinstance(wake_deficitModel, ConvectionDeficitModel)
             assert rotorAvgModel is None or isinstance(rotorAvgModel, RotorCenter), \
                 "WeightedSum only works with RotorCenter"
-=======
-        # if isinstance(superpositionModel, WeightedSum):
-        #    assert isinstance(wake_deficitModel, ConvectionDeficitModel)
-        #    assert rotorAvgModel.__class__ is RotorCenter, "Multiple rotor average points not implemented for WeightedSum"
->>>>>>> update of induction computation
         # TI_eff requires a turbulence model
         assert 'TI_eff_ilk' not in wake_deficitModel.args4deficit or turbulenceModel
         self.wake_deficitModel = wake_deficitModel
@@ -631,11 +625,7 @@ class PropagateDownwind(EngineeringWindFarmModel):
 
                 # Calculate deficit
                 if isinstance(self.superpositionModel, WeightedSum):
-<<<<<<< HEAD
                     deficit, uc, sigma_sqr, _ = self._calc_deficit_convection(**model_kwargs)
-=======
-                    deficit, uc, sigma_sqr, _ = self._calc_deficit_convection(dw_ijlk=dw_ijlk, **args)
->>>>>>> update of induction computation
                     uc_nk.append(uc[0])
                     sigma_sqr_nk.append(sigma_sqr[0])
                     cw_nk[-1] = (self.rotorAvgModel(lambda **kwargs: kwargs['cw_ijlk'], dw_ijlk=dw_ijlk, **args))[0]
@@ -786,27 +776,18 @@ class All2AllIterative(EngineeringWindFarmModel):
 
             # Calculate deficit
             if isinstance(self.superpositionModel, WeightedSum):
-<<<<<<< HEAD
                 deficit_iilk, uc_iilk, sigmasqr_iilk, blockage_iilk = self._calc_deficit_convection(**model_kwargs)
-=======
-                deficit_iilk, uc_iilk, sigmasqr_iilk, blockage_iilk = self._calc_deficit_convection(**args)
                 cwavg_iilk = (self.rotorAvgModel(lambda **kwargs: kwargs['cw_ijlk'], **args))
             elif isinstance(self.superpositionModel, CumulativeWakeSum):
                 sigmasqr_iilk = (self.wake_deficitModel.sigma_ijlk(**args))**2 * (args['dw_ijlk'] > 1e-10)
                 cwavg_iilk = (self.rotorAvgModel(lambda **kwargs: kwargs['cw_ijlk'], **args))
                 _, blockage_iilk = self._calc_deficit(**args)
->>>>>>> update of induction computation
             else:
                 deficit_iilk, blockage_iilk = self._calc_deficit(**model_kwargs)
 
             # Calculate effective wind speed
             if isinstance(self.superpositionModel, WeightedSum):
                 WS_eff_ilk = WS_ilk - self.superpositionModel(WS_ilk, deficit_iilk,
-<<<<<<< HEAD
-                                                              uc_iilk, sigmasqr_iilk,
-                                                              model_kwargs['cw_ijlk'],
-                                                              model_kwargs['hcw_ijlk'],
-=======
                                                               uc_iilk,
                                                               sigmasqr_iilk,
                                                               cwavg_iilk,
@@ -823,7 +804,6 @@ class All2AllIterative(EngineeringWindFarmModel):
                                                               sigmasqr_iilk,
                                                               cwavg_iilk,
                                                               args['hcw_ijlk'],
->>>>>>> update of induction computation
                                                               dh_iil[..., na])
                 # Add blockage as linear effect
                 if self.blockage_deficitModel:

@@ -4,11 +4,8 @@ from py_wake.deficit_models.deficit_model import DeficitModel
 from py_wake.deficit_models.no_wake import NoWakeDeficit
 from py_wake.deficit_models import BlockageDeficitModel
 from py_wake.utils.gradients import cabs
-<<<<<<< HEAD
 import warnings
-=======
 from py_wake.deficit_models.utils import a0
->>>>>>> update of induction computation
 
 
 class SelfSimilarityDeficit(BlockageDeficitModel):
