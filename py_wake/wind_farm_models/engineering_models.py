@@ -64,16 +64,10 @@ class EngineeringWindFarmModel(WindFarmModel):
             setattr(self, name, model)
         self.inputModifierModels = inputModifierModels
 
-<<<<<<< HEAD
         if isinstance(superpositionModel, WeightedSum):
             assert isinstance(wake_deficitModel, ConvectionDeficitModel)
             assert rotorAvgModel is None or isinstance(rotorAvgModel, RotorCenter), \
                 "WeightedSum only works with RotorCenter"
-=======
-        # if isinstance(superpositionModel, WeightedSum):
-        #    assert isinstance(wake_deficitModel, ConvectionDeficitModel)
-        #    assert rotorAvgModel.__class__ is RotorCenter, "Multiple rotor average points not implemented for WeightedSum"
->>>>>>> update of induction computation
         # TI_eff requires a turbulence model
         assert 'TI_eff_ilk' not in wake_deficitModel.args4deficit or turbulenceModel
         self.wake_deficitModel = wake_deficitModel
@@ -816,7 +810,7 @@ class All2AllIterative(EngineeringWindFarmModel):
 
             # Calculate deficit
             if isinstance(self.superpositionModel, WeightedSum):
-                deficit_iilk, uc_iilk, sigmasqr_iilk, blockage_iilk = self._calc_deficit_convection(**args)
+                deficit_iilk, uc_iilk, sigmasqr_iilk, blockage_iilk = self._calc_deficit_convection(**model_kwargs)
                 cwavg_iilk = (self.rotorAvgModel(lambda **kwargs: kwargs['cw_ijlk'], **args))
             elif isinstance(self.superpositionModel, CumulativeWakeSum):
                 sigmasqr_iilk = (self.wake_deficitModel.sigma_ijlk(**args))**2 * (args['dw_ijlk'] > 1e-10)
@@ -833,10 +827,25 @@ class All2AllIterative(EngineeringWindFarmModel):
             # Calculate effective wind speed
             if isinstance(self.superpositionModel, WeightedSum):
                 WS_eff_ilk = WS_ilk - self.superpositionModel(WS_ilk, deficit_iilk,
-<<<<<<< HEAD
                                                               uc_iilk, sigmasqr_iilk,
                                                               model_kwargs['cw_ijlk'],
                                                               model_kwargs['hcw_ijlk'],
+                                                              uc_iilk,
+                                                              sigmasqr_iilk,
+                                                              cwavg_iilk,
+                                                              args['hcw_ijlk'],
+                                                              dh_iil[..., na])
+                # Add blockage as linear effect
+                if self.blockage_deficitModel:
+                    WS_eff_ilk -= (self.blockage_deficitModel.superpositionModel or LinearSum())(blockage_iilk)
+            elif isinstance(self.superpositionModel, CumulativeWakeSum):
+                WS_eff_ilk = WS_ilk - self.superpositionModel(WS_ilk * np.ones_like(args['WS_eff_ilk']),
+                                                              args['WS_eff_ilk'],
+                                                              args['ct_ilk'],
+                                                              args['D_src_il'],
+                                                              sigmasqr_iilk,
+                                                              cwavg_iilk,
+                                                              args['hcw_ijlk'],
                                                               dh_iil[..., na])
                 # Add blockage as linear effect
                 if self.blockage_deficitModel:
