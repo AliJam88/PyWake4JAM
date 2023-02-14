@@ -41,26 +41,22 @@ class BastankhahGaussianDeficit(ConvectionDeficitModel):
         return self.k_ilk(**kwargs)[:, na] * dw_ijlk + \
             self.epsilon_ilk(ct_ilk)[:, na] * D_src_il[:, na, :, na]
 
-    # def _calc_deficit(self, D_src_il, dw_ijlk, ct_ilk, **kwargs):
-    #     if self.WS_key == 'WS_jlk':
-    #         WS_ref_ijlk = kwargs[self.WS_key][na]
-    #     else:
-    #         WS_ref_ijlk = kwargs[self.WS_key][:, na]
-
-    def _calc_deficit(self, WS_ilk, WS_eff_ilk, D_src_il, dw_ijlk, cw_ijlk, ct_ilk, **kwargs):
-        WS_ref_ilk = (WS_ilk, WS_eff_ilk)[self.use_effective_ws]
+    def _calc_deficit(self, D_src_il, dw_ijlk, ct_ilk, **kwargs):
+        if self.WS_key == 'WS_jlk':
+            WS_ref_ijlk = kwargs[self.WS_key][na]
+        else:
+            WS_ref_ijlk = kwargs[self.WS_key][:, na]
         # dimensional wake expansion
         sigma_sqr_ijlk = (self.sigma_ijlk(D_src_il=D_src_il, dw_ijlk=dw_ijlk, ct_ilk=ct_ilk, **kwargs))**2
         # maximum added to avoid sqrt of negative number
         # radical_ijlk = np.maximum(0, (1. - ct_ilk[:, na] * D_src_il[:, na, :, na]**2 / (8. * sigma_sqr_ijlk)))
         # deficit_centre_ijlk = WS_ref_ilk[:, na] * (1. - np.sqrt(radical_ijlk)) * (dw_ijlk > 0)
-        deficit_centre_ijlk = WS_ref_ilk[:, na] * 2. * a0(ct_ilk[:, na] * D_src_il[:, na, :, na]**2 / (8. * sigma_sqr_ijlk)) * (dw_ijlk > 0)
+        deficit_centre_ijlk = WS_ref_ijlk * 2. * a0(ct_ilk[:, na] * D_src_il[:, na, :, na]**2 / (8. * sigma_sqr_ijlk)) * (dw_ijlk > 0)
 
-        return WS_ref_ilk, sigma_sqr_ijlk, deficit_centre_ijlk
+        return WS_ref_ijlk, sigma_sqr_ijlk, deficit_centre_ijlk
 
-    def calc_deficit(self, WS_ilk, WS_eff_ilk, D_src_il, dw_ijlk, cw_ijlk, ct_ilk, **kwargs):
-        _, sigma_sqr_ijlk, deficit_centre_ijlk = self._calc_deficit(WS_ilk, WS_eff_ilk, D_src_il, dw_ijlk,
-                                                                    ct_ilk, **kwargs)
+    def calc_deficit(self, D_src_il, dw_ijlk, cw_ijlk, ct_ilk, **kwargs):
+        _, sigma_sqr_ijlk, deficit_centre_ijlk = self._calc_deficit(D_src_il, dw_ijlk, ct_ilk, **kwargs)
 
         # term inside exp()
         exponent_ijlk = -1 / (2 * sigma_sqr_ijlk) * cw_ijlk**2
@@ -88,12 +84,12 @@ class BastankhahGaussianDeficit(ConvectionDeficitModel):
         if self.groundModel or (self.rotorAvgModel and not isinstance(self.rotorAvgModel, RotorCenter)):
             raise NotImplementedError(
                 "calc_deficit_convection (WeightedSum) cannot be used in combination with rotorAvgModels and GroundModels")
-        WS_ref_ilk, sigma_sqr_ijlk, deficit_centre_ijlk = self._calc_deficit(WS_ilk, WS_eff_ilk,
-                                                                             D_src_il, dw_ijlk, ct_ilk,
+        WS_ref_ilk, sigma_sqr_ijlk, deficit_centre_ijlk = self._calc_deficit(D_src_il, dw_ijlk, ct_ilk,
                                                                              **kwargs)
         # Convection velocity
         # uc_ijlk = WS_ref_ilk[:, na] * 0.5 * (1. + np.sqrt(radical_ijlk))
         uc_ijlk = WS_ref_ilk[:, na] * (1. - a0(ct_ilk[:, na] * D_src_il[:, na, :, na]**2 / (8. * sigma_sqr_ijlk)))
+        sigma_sqr_ijlk = np.broadcast_to(sigma_sqr_ijlk, deficit_centre_ijlk.shape)
 
         return deficit_centre_ijlk, uc_ijlk, sigma_sqr_ijlk
 
