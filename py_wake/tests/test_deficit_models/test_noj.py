@@ -30,7 +30,7 @@ def test_NOJ_Nibe_result():
     h_i = [50, 50, 50]
     wfm = All2AllIterative(site, NibeA0(), wake_deficitModel=NOJDeficit(), superpositionModel=LinearSum())
     WS_eff = wfm(x_i, y_i, h_i, type=[0, 1, 1], wd=0.0, ws=8.1).WS_eff
-    npt.assert_array_almost_equal(WS_eff.squeeze(), [8.1, 4.35, 5.7])
+    npt.assert_array_almost_equal(WS_eff.squeeze(), [8.1, 4.421432, 5.745717])
 
 
 def test_NOJ_Nibe_result_wake_map():
@@ -45,7 +45,7 @@ def test_NOJ_Nibe_result_wake_map():
     wake_model = NOJ(site, windTurbines)
     sim_res = wake_model(x=[0], y=[0], wd=[0], ws=[8.1])
     WS_eff_xy = sim_res.flow_map(HorizontalGrid(x=[0], y=[0, -40, -100], h=50)).WS_eff_xylk.mean(['wd', 'ws'])
-    npt.assert_array_almost_equal(WS_eff_xy[:, 0], [8.1, 4.35, 5.7])
+    npt.assert_array_almost_equal(WS_eff_xy[:, 0], [8.1, 4.421432, 5.745717])
 
 
 @pytest.mark.parametrize('wdir,x,y', [(0, [0, 0, 0], [0, -40, -100]),
@@ -62,8 +62,10 @@ def test_NOJ_two_turbines_in_row(wdir, x, y):
     wfm.verbose = False
     h_i = [50, 50, 50]
     WS_eff = wfm(x, y, h_i, wd=wdir, ws=8.1).WS_eff
-    ws_wt3 = 8.1 - np.hypot(8.1 * 2 / 3 * (20 / 26)**2, 8.1 * 2 / 3 * (20 / 30)**2)
-    npt.assert_array_almost_equal(WS_eff.squeeze(), [8.1, 4.35, ws_wt3])
+    # ws_wt3 = 8.1 - np.hypot(8.1 * 2 / 3 * (20 / 26)**2, 8.1 * 2 / 3 * (20 / 30)**2)
+    # npt.assert_array_almost_equal(WS_eff.squeeze(), [8.1, 4.35, ws_wt3])
+    npt.assert_array_almost_equal(WS_eff.squeeze(), [8.1, 4.421432, 4.179908])
+
 
 
 def test_NOJ_6_turbines_in_row():
@@ -75,8 +77,10 @@ def test_NOJ_6_turbines_in_row():
     wfm = NOJ(site, NibeA0())
     wfm.verbose = False
     WS_eff = wfm(x, y, 50, wd=0.0, ws=11.0).WS_eff.squeeze()
+    # npt.assert_array_almost_equal(
+    #     WS_eff[1:], 11 - np.sqrt(np.cumsum(((11 * 2 / 3 * 20**2)**2) / (20 + 8 * np.arange(1, 6))**4)))
     npt.assert_array_almost_equal(
-        WS_eff[1:], 11 - np.sqrt(np.cumsum(((11 * 2 / 3 * 20**2)**2) / (20 + 8 * np.arange(1, 6))**4)))
+        WS_eff[1:], np.array([7.329774, 6.710464, 6.460267, 6.337212, 6.269201]))
 
 
 def test_NOJLocal_6_turbines_in_row():

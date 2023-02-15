@@ -37,8 +37,7 @@ class NOJDeficit(NiayifarGaussianDeficit, WakeRadiusTopHat):
 
     def calc_deficit(self, ct_ilk, **kwargs):
         if not self.deficit_initalized:
-            self._calc_layout_terms(
-                WS_ilk, WS_eff_ilk, D_src_il, D_dst_ijl, dw_ijlk, cw_ijlk, ct_ilk=ct_ilk, **kwargs)
+            self._calc_layout_terms(ct_ilk=ct_ilk, **kwargs)
         term_numerator_ilk = 2. * a0(ct_ilk)
         return term_numerator_ilk[:, na] * self.layout_factor_ijlk
 

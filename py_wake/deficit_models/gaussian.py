@@ -80,15 +80,15 @@ class BastankhahGaussianDeficit(ConvectionDeficitModel):
     #     uc_ijlk = WS_ref_ijlk * 0.5 * (1. + np.sqrt(radical_ijlk))
     #     sigma_sqr_ijlk = np.broadcast_to(sigma_sqr_ijlk, deficit_centre_ijlk.shape)
 
-    def calc_deficit_convection(self, WS_ilk, WS_eff_ilk, D_src_il, dw_ijlk, cw_ijlk, ct_ilk, **kwargs):
-        if self.groundModel or (self.rotorAvgModel and not isinstance(self.rotorAvgModel, RotorCenter)):
-            raise NotImplementedError(
-                "calc_deficit_convection (WeightedSum) cannot be used in combination with rotorAvgModels and GroundModels")
+    def calc_deficit_convection(self, D_src_il, dw_ijlk, cw_ijlk, ct_ilk, **kwargs):
+        # if self.groundModel or (self.rotorAvgModel and not isinstance(self.rotorAvgModel, RotorCenter)):
+        #     raise NotImplementedError(
+        #         "calc_deficit_convection (WeightedSum) cannot be used in combination with rotorAvgModels and GroundModels")
         WS_ref_ilk, sigma_sqr_ijlk, deficit_centre_ijlk = self._calc_deficit(D_src_il, dw_ijlk, ct_ilk,
                                                                              **kwargs)
         # Convection velocity
         # uc_ijlk = WS_ref_ilk[:, na] * 0.5 * (1. + np.sqrt(radical_ijlk))
-        uc_ijlk = WS_ref_ilk[:, na] * (1. - a0(ct_ilk[:, na] * D_src_il[:, na, :, na]**2 / (8. * sigma_sqr_ijlk)))
+        uc_ijlk = WS_ref_ilk * (1. - a0(ct_ilk[:, na] * D_src_il[:, na, :, na]**2 / (8. * sigma_sqr_ijlk)))
         sigma_sqr_ijlk = np.broadcast_to(sigma_sqr_ijlk, deficit_centre_ijlk.shape)
 
         return deficit_centre_ijlk, uc_ijlk, sigma_sqr_ijlk

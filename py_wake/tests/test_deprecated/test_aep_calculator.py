@@ -43,7 +43,7 @@ def test_wake_map():
         plt.plot(X[m], Y[m], '.-r')
         plt.show()
 
-    ref = [3.27, 3.27, 9.0, 7.46, 7.46, 7.46, 7.46, 7.31, 7.31, 7.31, 7.31, 8.3, 8.3, 8.3, 8.3, 8.3, 8.3]
+    ref = [3.38, 3.38, 9.  , 7.49, 7.49, 7.49, 7.49, 7.34, 7.34, 7.34, 7.34, 8.31, 8.31, 8.31, 8.31, 8.31, 8.31]
     npt.assert_array_almost_equal(Z[m], ref, 2)
 
 
@@ -119,4 +119,4 @@ def test_aep_no_wake_loss_hornsrev():
     npt.assert_almost_equal(aep_nowake / 80, 8.260757098)
     cap_factor = aep.calculate_AEP(x, y).sum() / aep_nowake
     # print(cap_factor)
-    npt.assert_almost_equal(cap_factor, 0.947175839142014)
+    npt.assert_almost_equal(cap_factor, 0.9464624335249749)

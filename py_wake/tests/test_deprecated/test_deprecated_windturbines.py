@@ -50,7 +50,7 @@ def test_DeprecatedWindTurbines():
         types0 = [0] * 9
         wfm = NOJ(Hornsrev1Site(), wts)
         npt.assert_array_equal(wts.types(), [0])
-        npt.assert_almost_equal(wfm.aep(wt9_x, wt9_y, type=types0, yaw=0), 81.2066072392765)
+        npt.assert_almost_equal(wfm.aep(wt9_x, wt9_y, type=types0, yaw=0), 81.17285181355763)
 
 
 def test_deprecated_from_WindTurbines():

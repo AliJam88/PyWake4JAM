@@ -91,12 +91,12 @@ def run_floating(wfm_cls, pitch, displacement):
 
 
 @pytest.mark.parametrize('wfm_cls,pitch,displacement,ref', [
-    (PropagateDownwind, False, False, [10., 6.51877627, 6.0475109]),
-    (All2AllIterative, False, False, [10., 6.51877627, 6.0475109]),
-    (PropagateDownwind, True, False, [10., 7.4433646, 6.91514802]),
-    (All2AllIterative, True, False, [10., 7.4433646, 6.91514802]),
-    (All2AllIterative, False, True, [10., 6.457691, 6.023898]),
-    (All2AllIterative, True, True, [10., 7.398151, 6.896803])
+    (PropagateDownwind, False, False, [10.      ,  6.447329,  6.05367]),
+    (All2AllIterative, False, False, [10.      ,  6.447329,  6.05367]),
+    (PropagateDownwind, True, False, [10.      ,  7.390893,  6.914902]),
+    (All2AllIterative, True, False, [10.      ,  7.390893,  6.914902]),
+    (All2AllIterative, False, True, [10.      ,  6.382124,  6.031301]),
+    (All2AllIterative, True, True, [10.      ,  7.342928,  6.897159])
 ])
 def test_floating_pitch_modifier(wfm_cls, pitch, displacement, ref):
 

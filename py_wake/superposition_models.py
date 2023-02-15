@@ -193,9 +193,13 @@ class WeightedSum(SuperpositionModel):
 
 class CumulativeWakeSum(SuperpositionModel):
     """
-    Cumulative
+    Implemention of the cumulative wake model:
+    Majid Bastankhah, Bridget L. Welch, Luis A. Martínez-Tossas,Jennifer King and Paul Fleming
+    Analytical solution for the cumulative wake of wind turbines in wind farms
+    J. Fluid Mech. (2021), vol. 911, A53, doi:10.1017/jfm.2020.1037
     """
-    def __init__(self, alpha=2., ):
+    def __init__(self, alpha=2.):
+        # somewhat empirical factor to scale results to fit LES predictions
         self.alpha = alpha
 
     def __call__(self, WS0_xxx, WS_eff_xxx, ct_xxx, D_xx, sigma_sqr_jxxx, cw_jxxx, hcw_jxxx, dh_jxxx):
@@ -204,7 +208,6 @@ class CumulativeWakeSum(SuperpositionModel):
         WS_eff = WS_eff_xxx
         ct = ct_xxx
         D = D_xx
-        # C = C_jxxx
         sigma_sqr = sigma_sqr_jxxx
         downwind = (sigma_sqr > 1e-10)
         sigma_sqr[~downwind] = 1.

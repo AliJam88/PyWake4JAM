@@ -64,10 +64,10 @@ class EngineeringWindFarmModel(WindFarmModel):
             setattr(self, name, model)
         self.inputModifierModels = inputModifierModels
 
-        if isinstance(superpositionModel, WeightedSum):
-            assert isinstance(wake_deficitModel, ConvectionDeficitModel)
-            assert rotorAvgModel is None or isinstance(rotorAvgModel, RotorCenter), \
-                "WeightedSum only works with RotorCenter"
+        # if isinstance(superpositionModel, WeightedSum):
+        #     assert isinstance(wake_deficitModel, ConvectionDeficitModel)
+        #     assert rotorAvgModel is None or isinstance(rotorAvgModel, RotorCenter), \
+        #         "WeightedSum only works with RotorCenter"
         # TI_eff requires a turbulence model
         assert 'TI_eff_ilk' not in wake_deficitModel.args4deficit or turbulenceModel
         self.wake_deficitModel = wake_deficitModel
@@ -79,7 +79,12 @@ class EngineeringWindFarmModel(WindFarmModel):
                           DeprecationWarning, stacklevel=2)
             check_model(rotorAvgModel, RotorAvgModel, 'rotorAvgModel')
             self.wake_deficitModel.rotorAvgModel = self.wake_deficitModel.rotorAvgModel or rotorAvgModel
-
+        if isinstance(superpositionModel, WeightedSum) or isinstance(superpositionModel, CumulativeWakeSum):
+            if not self.wake_deficitModel.rotorAvgModel:
+                self.wake_deficitModel.rotorAvgModel = RotorCenter()
+        #     assert isinstance(wake_deficitModel, ConvectionDeficitModel)
+        #     assert rotorAvgModel is None or isinstance(rotorAvgModel, RotorCenter), \
+        #         "WeightedSum only works with RotorCenter"
         self.superpositionModel = superpositionModel
         self.blockage_deficitModel = blockage_deficitModel
         self.deflectionModel = deflectionModel
@@ -300,6 +305,7 @@ class EngineeringWindFarmModel(WindFarmModel):
 
         if 'wake_radius_ijl' in self.args4all:
             model_kwargs['wake_radius_ijl'] = self.wake_deficitModel.wake_radius(**model_kwargs)[..., 0]
+
         if 'z_ijlk' in self.args4all:
             model_kwargs['z_ijlk'] = wt_h_ilk[:, na] + dh_ijlk
 
@@ -474,15 +480,8 @@ class PropagateDownwind(EngineeringWindFarmModel):
         yaw_mk = ilk2mk(kwargs.get('yaw_ilk', [[[0]]]))
         tilt_mk = ilk2mk(kwargs.get('tilt_ilk', [[[0]]]))
         modified_input_dict_mk = []
-
-        # TI_mk = ilk2mk(TI_ilk)
-        # WS_mk = ilk2mk(WS_ilk)
         WS_free_mk = []
         D_mk = []
-        # WS_eff_mk = []
-        # TI_eff_mk = []
-        # yaw_mk = ilk2mk(yaw_ilk)
-        # tilt_mk = ilk2mk(tilt_ilk)
         ct_jlk = []
 
         if self.turbulenceModel:
@@ -624,7 +623,7 @@ class PropagateDownwind(EngineeringWindFarmModel):
                     deficit, uc, sigma_sqr, _ = self._calc_deficit_convection(**model_kwargs)
                     uc_nk.append(uc[0])
                     sigma_sqr_nk.append(sigma_sqr[0])
-                    cw_nk[-1] = (self.wake_deficitModel.rotorAvgModel(lambda **kwargs: kwargs['cw_ijlk'], dw_ijlk=dw_ijlk, **model_kwargs))[0]
+                    cw_nk[-1] = (self.wake_deficitModel.rotorAvgModel(lambda **kwargs: kwargs['cw_ijlk'], **model_kwargs))[0]
                 elif isinstance(self.superpositionModel, CumulativeWakeSum):
                     # only sigma needed in cumulative wake model, centreline deficit computed inside superpostion model
                     # sigma set to zero upstream to ensure downwind activation only
@@ -811,7 +810,7 @@ class All2AllIterative(EngineeringWindFarmModel):
             # Calculate deficit
             if isinstance(self.superpositionModel, WeightedSum):
                 deficit_iilk, uc_iilk, sigmasqr_iilk, blockage_iilk = self._calc_deficit_convection(**model_kwargs)
-                cwavg_iilk = (self.rotorAvgModel(lambda **kwargs: kwargs['cw_ijlk'], **model_kwargs))
+                cwavg_iilk = (self.wake_deficitModel.rotorAvgModel(lambda **kwargs: kwargs['cw_ijlk'], **model_kwargs))
             elif isinstance(self.superpositionModel, CumulativeWakeSum):
                 sigmasqr_iilk = (self.wake_deficitModel.sigma_ijlk(**model_kwargs))**2 * (model_kwargs['dw_ijlk'] > 1e-10)
                 cwavg_iilk = (self.wake_deficitModel.rotorAvgModel(lambda **kwargs: kwargs['cw_ijlk'], **model_kwargs))

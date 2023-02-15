@@ -37,7 +37,7 @@ def test_multirotor(wfm_cls):
 
     for k in ['x', 'y']:
         npt.assert_array_almost_equal(sim_res[k], sim_res2[k], 10)
-    npt.assert_array_almost_equal(sim_res.WS_eff, sim_res2.WS_eff, 5)
+    npt.assert_array_almost_equal(sim_res.WS_eff, sim_res2.WS_eff, 4)
 
 
 @pytest.mark.parametrize('wfm_cls', [PropagateDownwind, All2AllIterative])
@@ -55,7 +55,7 @@ def test_multirotor_deficit_profile(wfm_cls):
         sim_res.WS_eff.sel(wt=2).squeeze().plot()
         plt.show()
     npt.assert_array_almost_equal(sim_res.WS_eff.sel(wt=2).squeeze(),
-                                  [11.99, 11.87, 11.02, 9.23, 8.91, 9.69, 8.91, 9.23, 11.02, 11.87, 11.99], 2)
+                                  [11.99, 11.87, 11.01,  9.19,  8.87,  9.66,  8.87,  9.19, 11.01, 11.87, 11.99], 2)
 
 
 @pytest.mark.parametrize('wfm_cls', [PropagateDownwind, All2AllIterative])

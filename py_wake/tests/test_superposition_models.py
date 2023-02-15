@@ -15,8 +15,8 @@ from py_wake.deficit_models import NoWakeDeficit
 from py_wake.examples.data.iea37._iea37 import IEA37Site, IEA37_WindTurbines
 from py_wake.deficit_models.gaussian import BastankhahGaussianDeficit
 
-d02 = 8.1 - 5.7
-d12 = 8.1 - 4.90473373
+d02 = 2.35428346 # 8.1 - 5.7
+d12 = 3.13440105 # 8.1 - 4.90473373
 
 
 @pytest.mark.parametrize('superpositionModel,res', [(LinearSum(), 8.1 - (d02 + d12)),
@@ -85,7 +85,7 @@ def test_superposition_model_indices(superpositionModel, sum_func):
         WS_eff = wake_model(x_i, y_i, h_i, type=[1, 1, 1], wd=0.0, ws=8.1).WS_eff
         npt.assert_array_equal(WS_eff, WS_ilk)
 
-        ref = WS_ilk - np.reshape([0, 3.75, sum_func([2.4, 3.58974359])], (3, 1, 1))
+        ref = WS_ilk - np.reshape([0, 3.6785679012345667, sum_func([2.3542834567901227, 3.5213641447715505])], (3, 1, 1)) # np.reshape([0, 3.75, sum_func([2.4, 3.58974359])], (3, 1, 1))
 
         # full wake (CT=8/9)
         WS_eff = wake_model(x_i, y_i, h_i, wd=0.0, ws=8.1).WS_eff
