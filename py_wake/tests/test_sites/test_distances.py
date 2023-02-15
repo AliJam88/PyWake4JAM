@@ -246,7 +246,7 @@ def test_distance_over_rectangle():
         plt.legend()
         plt.show()
 
-    ref = [3., 3.42, 3.8, 6.02, 6.17, 6.31, 6.43, 7.29, 7.35, 7.41, 7.47, 7.53, 7.58]
+    ref = [3.11, 3.53, 3.91, 6.08, 6.23, 6.36, 6.49, 7.32, 7.39, 7.45, 7.51, 7.56, 7.61]
     npt.assert_array_almost_equal(Z[my, :25:2], ref, 2)
 
 

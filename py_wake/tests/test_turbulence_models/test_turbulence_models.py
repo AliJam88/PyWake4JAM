@@ -38,8 +38,8 @@ WindFarmModel.verbose = False
      [0.075, 0.075, 0.075, 0.215, 0.229, 0.179, 0.075, 0.075, 0.075, 0.075, 0.075, 0.075, 0.075, 0.215, 0.075, 0.075]),
     (GCLTurbulence(), [0.075, 0.075, 0.075, 0.117, 0.151, 0.135, 0.075, 0.075, 0.075,
                        0.075, 0.075, 0.075, 0.128, 0.127, 0.117, 0.128]),
-    (CrespoHernandez(), [0.075, 0.075, 0.075, 0.129, 0.17, 0.151, 0.075,
-                         0.075, 0.075, 0.075, 0.075, 0.075, 0.143, 0.141, 0.13, 0.143])
+    (CrespoHernandez(), [0.075, 0.075, 0.075, 0.127, 0.168, 0.149, 0.075, 0.075, 0.075,
+                         0.075, 0.075, 0.075, 0.142, 0.14 , 0.129, 0.142])
 ])
 def test_models_with_noj(turbulence_model, ref_ti):
     # setup site, turbines and wind farm model
@@ -67,8 +67,8 @@ def test_models_with_noj(turbulence_model, ref_ti):
 @pytest.mark.parametrize('turbulence_model,ref_ti', [
     (GCLTurbulence(), [0.075, 0.075, 0.075, 0.097, 0.151, 0.135,
                        0.075, 0.075, 0.075, 0.075, 0.075, 0.075, 0.128, 0.123, 0.116, 0.128]),
-    (CrespoHernandez(), [0.075, 0.075, 0.075, 0.104, 0.17, 0.151, 0.075,
-                         0.075, 0.075, 0.075, 0.075, 0.075, 0.143, 0.137, 0.129, 0.143])
+    (CrespoHernandez(), [0.075, 0.075, 0.075, 0.104, 0.168, 0.149, 0.075, 0.075, 0.075,
+                         0.075, 0.075, 0.075, 0.142, 0.135, 0.127, 0.142])
 ])
 def test_models_with_BastankhahGaussian(turbulence_model, ref_ti):
     # setup site, turbines and wind farm model

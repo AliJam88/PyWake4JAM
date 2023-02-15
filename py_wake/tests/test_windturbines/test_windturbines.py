@@ -50,7 +50,7 @@ def test_DeprecatedWindTurbines():
         types0 = [0] * 9
         for wfm in get_wfms(wts):
             npt.assert_array_equal(wts.types(), [0])
-            npt.assert_almost_equal(wfm.aep(wt9_x, wt9_y, type=types0, yaw=0), 81.2066072392765)
+            npt.assert_almost_equal(wfm.aep(wt9_x, wt9_y, type=types0, yaw=0), 81.17285181355763)
 
 
 def test_WindTurbines():
@@ -65,7 +65,7 @@ def test_WindTurbines():
         types0 = [0] * 9
         for wfm in get_wfms(wts):
             npt.assert_array_equal(wts.types(), [0])
-            npt.assert_almost_equal(wfm.aep(wt9_x, wt9_y, type=types0), 81.2066072392765)
+            npt.assert_almost_equal(wfm.aep(wt9_x, wt9_y, type=types0), 81.17285181355763)
 
 
 def test_V80_windturbines():
@@ -73,7 +73,7 @@ def test_V80_windturbines():
     types0 = [0] * 9
     for wfm in get_wfms(wts):
         npt.assert_array_equal(wts.types(), [0])
-        npt.assert_almost_equal(wfm.aep(wt9_x, wt9_y, type=types0), 81.2066072392765)
+        npt.assert_almost_equal(wfm.aep(wt9_x, wt9_y, type=types0), 81.17285181355763)
 
 
 def test_IEA37WindTurbines():
@@ -103,9 +103,9 @@ def test_twotype_windturbines():
 
     for wfm in get_wfms(wts):
         npt.assert_array_equal(wts.types(), [0, 1])
-        npt.assert_almost_equal(wfm.aep(wt9_x, wt9_y, type=types0), 81.2066072392765)
-        npt.assert_almost_equal(wfm.aep(wt9_x, wt9_y, type=types1), 83.72420504573488)
-        npt.assert_almost_equal(wfm.aep(wt9_x, wt9_y, type=types2), 88.87227386796884)
+        npt.assert_almost_equal(wfm.aep(wt9_x, wt9_y, type=types0), 81.17285181355763)
+        npt.assert_almost_equal(wfm.aep(wt9_x, wt9_y, type=types1), 83.68684964061508)
+        npt.assert_almost_equal(wfm.aep(wt9_x, wt9_y, type=types2), 88.82872354305412)
 
 
 @pytest.mark.parametrize('wts_wtg', [

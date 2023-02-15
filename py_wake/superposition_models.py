@@ -194,7 +194,7 @@ class WeightedSum(SuperpositionModel):
 class CumulativeWakeSum(SuperpositionModel):
     """
     Implemention of the cumulative wake model:
-    Majid Bastankhah, Bridget L. Welch, Luis A. Martínez-Tossas,Jennifer King and Paul Fleming
+    Majid Bastankhah, Bridget L. Welch, Luis A. Martínez-Tossas, Jennifer King and Paul Fleming
     Analytical solution for the cumulative wake of wind turbines in wind farms
     J. Fluid Mech. (2021), vol. 911, A53, doi:10.1017/jfm.2020.1037
     """

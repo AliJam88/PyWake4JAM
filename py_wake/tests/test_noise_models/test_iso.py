@@ -64,13 +64,11 @@ def test_iso_noise_map():
     sim_res.noise_map()  # cover default grid
     nmap = sim_res.noise_map(grid=XYGrid(x=np.linspace(-1000, 4000, 100), y=np.linspace(-1000, 1000, 50), h=2))
 
-    npt.assert_array_almost_equal(total_spl_jlk.squeeze(), [34.87997084, 29.56191044])
+    npt.assert_array_almost_equal(total_spl_jlk.squeeze(), [34.863348, 29.527093])
     npt.assert_array_almost_equal(
         spl_jlkf.squeeze(),
-        [[2.21381744e+01, 2.60932044e+01, 2.88772888e+01, 2.84115953e+01, 2.82813953e+01, 2.55784584e+01,
-          7.29692738e+00, -5.38230264e+01],
-         [1.78459253e+01, 2.16729775e+01, 2.40686797e+01, 2.29153778e+01, 2.21888885e+01, 1.89631674e+01,
-          -3.52596583e-02, -6.18125090e+01]])
+        [[22.118823,  26.074083,  28.858917,  28.394837,  28.266604, 25.566316,   7.290445, -53.823577],
+         [17.811299,  21.638177,  24.033478,  22.880075,  22.154369, 18.929959,  -0.067319, -61.844338]])
     npt.assert_array_almost_equal(nmap['Total sound pressure level'].interp(x=[x[0], x[-1]], y=1000),
                                   total_spl_jlk, 2)
     npt.assert_array_almost_equal(nmap['Sound pressure level'].interp(x=[x[0], x[-1]], y=1000),

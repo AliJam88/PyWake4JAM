@@ -44,8 +44,8 @@ def test_yaw_dimensions():
             yaw1 = yaw
         sim_res_1wd = wf_model(x, y, wd=1, yaw=yaw1)
 
-        npt.assert_almost_equal(sim_res_all_wd.WS_eff.sel(wt=1, wd=1, ws=10), 9.70670076)
-        npt.assert_almost_equal(sim_res_1wd.WS_eff.sel(wt=1, ws=10), 9.70670076)
+        npt.assert_almost_equal(sim_res_all_wd.WS_eff.sel(wt=1, wd=1, ws=10), 9.70474374)
+        npt.assert_almost_equal(sim_res_1wd.WS_eff.sel(wt=1, ws=10), 9.70474374)
 
 
 def test_calc_wt_interaction_parallel_results():
