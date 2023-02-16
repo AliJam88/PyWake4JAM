@@ -10,6 +10,7 @@ from py_wake.deficit_models.noj import NOJDeficit
 from py_wake.superposition_models import LinearSum, WeightedSum
 from py_wake.turbulence_models.stf import STF2017TurbulenceModel
 from py_wake.wind_turbines.power_ct_functions import PowerCtFunction
+from py_wake.deficit_models.utils import mom1d_a0
 
 
 def NibeA0():
@@ -89,7 +90,7 @@ def test_NOJLocal_6_turbines_in_row():
     y = - np.arange(n_wt) * 40 * 2
 
     site = UniformSite([1], 0.1)
-    wfm = NOJLocal(site, NibeA0(), turbulenceModel=STF2017TurbulenceModel())
+    wfm = NOJLocal(site, NibeA0(), turbulenceModel=STF2017TurbulenceModel(), a0=mom1d_a0)
     wfm.verbose = False
     WS_eff = wfm(x, y, 50, wd=0.0, ws=11.0).WS_eff
     npt.assert_array_almost_equal(WS_eff.squeeze()[1:], [5.62453869, 5.25806829, 5.64808912, 6.07792364, 6.44549094])
@@ -104,7 +105,7 @@ def test_NOJConvection():
 
 def test_NOJLocal_ti_eff_dependence():
     site = UniformSite([1], 0.1)
-    wfm = NOJLocal(site, NibeA0())
+    wfm = NOJLocal(site, NibeA0(), a0=mom1d_a0)
     sim_res = wfm([0, 40], [0, 0], wd=270, ws=[10, 10], TI=[[[.1, .2]]])
     npt.assert_array_almost_equal(sim_res.TI.squeeze(), [.1, .2])
     npt.assert_array_almost_equal(sim_res.TI_eff.squeeze(), [[.1, .2],

@@ -98,9 +98,9 @@ def test_GaussianOverlapAvgModel_blockage(blockageDeficitModel):
 def test_GaussianOverlapAvgModel_WeightedSum():
     wfm = PropagateDownwind(UniformSite(), V80(), BastankhahGaussianDeficit(rotorAvgModel=GaussianOverlapAvgModel()),
                             WeightedSum())
-    with pytest.raises(NotImplementedError, match=r"calc_deficit_convection \(WeightedSum\) cannot be used in combination with rotorAvgModels and GroundModels"):
-        wfm([0, 1000], [0, 0])
-
+    #with pytest.raises(NotImplementedError, match=r"calc_deficit_convection \(WeightedSum\) cannot be used in combination with rotorAvgModels and GroundModels"):
+    WS_eff = wfm([0, 400], [0, 40], ws=10, wd=270).values.WS_eff
+    npt.assert_array_almost_equal([10., 10.], WS_eff, decimal=2)
 
 def test_area_overlapping_deprecated_way():
     wts = WindTurbines(names=['V80'] * 2, diameters=[80] * 2,

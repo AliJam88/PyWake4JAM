@@ -387,14 +387,17 @@ def test_with_all_ti_models(turbulenceModel):
 def test_with_weighted_sum(model):
     if model is None:
         return
-    if model is RotorCenter:
-        wfm = All2AllIterative(UniformSite(), V80(), BastankhahGaussianDeficit(rotorAvgModel=model()),
-                               superpositionModel=WeightedSum())
-        wfm([0, 500], [0, 0])
-    else:
-        with pytest.raises(AssertionError, match='WeightedSum only works with RotorCenter'):
-            wfm = All2AllIterative(UniformSite(), V80(), BastankhahGaussianDeficit(),
-                                   superpositionModel=WeightedSum(), rotorAvgModel=model())
+    wfm = All2AllIterative(UniformSite(), V80(), BastankhahGaussianDeficit(rotorAvgModel=model()),
+                        superpositionModel=WeightedSum())
+    wfm([0, 500], [0, 0])
+    # if model is RotorCenter:
+    #     wfm = All2AllIterative(UniformSite(), V80(), BastankhahGaussianDeficit(rotorAvgModel=model()),
+    #                            superpositionModel=WeightedSum())
+    #     wfm([0, 500], [0, 0])
+    # else:
+    #     with pytest.raises(AssertionError, match='WeightedSum only works with RotorCenter'):
+    #         wfm = All2AllIterative(UniformSite(), V80(), BastankhahGaussianDeficit(),
+    #                                superpositionModel=WeightedSum(), rotorAvgModel=model())
 
 
 def test_WSPowerRotorAvgModel():

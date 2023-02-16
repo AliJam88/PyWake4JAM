@@ -5,7 +5,7 @@ from py_wake.superposition_models import SqrMaxSum
 from py_wake.utils.gradients import cabs
 from py_wake.deficit_models.deficit_model import WakeRadiusTopHat
 from py_wake.rotor_avg_models.area_overlap_model import AreaOverlapAvgModel
-from py_wake.deficit_models.utils import a0
+from py_wake.deficit_models.utils import madsen_a0
 
 
 class CrespoHernandez(TurbulenceModel, WakeRadiusTopHat):
@@ -17,12 +17,13 @@ class CrespoHernandez(TurbulenceModel, WakeRadiusTopHat):
 
     """
 
-    def __init__(self, c=[0.73, 0.8325, 0.0325, 0.32],
+    def __init__(self, a0=madsen_a0, c=[0.73, 0.8325, 0.0325, 0.32],
                  addedTurbulenceSuperpositionModel=SqrMaxSum(),
                  rotorAvgModel=AreaOverlapAvgModel(), groundModel=None):
         TurbulenceModel.__init__(self, addedTurbulenceSuperpositionModel, rotorAvgModel=rotorAvgModel,
                                  groundModel=groundModel)
         self.c = c
+        self._a0 = a0
 
     def calc_added_turbulence(self, dw_ijlk, cw_ijlk, D_src_il, ct_ilk, TI_ilk, D_dst_ijl, wake_radius_ijlk, **_):
         """ Calculate the added turbulence intensity at locations specified by
@@ -35,7 +36,7 @@ class CrespoHernandez(TurbulenceModel, WakeRadiusTopHat):
             Added turbulence intensity weighted by wake-turbine overlap [-]
         """
         # induction factor
-        a_ilk = a0(ct_ilk)
+        a_ilk = self._a0(ct_ilk)
         a_ilk = np.maximum(a_ilk, 1e-10)  # avoid error in gradient of a_ilk**0.8325 > 0.8325*a_ilk**-.1675
         # added turbulence (Eq. 21)
         dw_ijlk_gt0 = np.maximum(dw_ijlk, 1e-10)  # avoid divide by zero and sqrt of negative number

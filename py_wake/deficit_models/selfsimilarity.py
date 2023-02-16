@@ -5,7 +5,7 @@ from py_wake.deficit_models.no_wake import NoWakeDeficit
 from py_wake.deficit_models import BlockageDeficitModel
 from py_wake.utils.gradients import cabs
 import warnings
-from py_wake.deficit_models.utils import a0
+from py_wake.deficit_models.utils import madsen_a0
 
 
 class SelfSimilarityDeficit(BlockageDeficitModel):
@@ -13,7 +13,7 @@ class SelfSimilarityDeficit(BlockageDeficitModel):
         [1] N. Troldborg, A.R. Meyer Forsting, Wind Energy, 2016
     """
 
-    def __init__(self, ss_gamma=1.1, ss_lambda=0.587, ss_eta=1.32, ss_alpha=8. / 9., ss_beta=np.sqrt(2),
+    def __init__(self, a0=madsen_a0, ss_gamma=1.1, ss_lambda=0.587, ss_eta=1.32, ss_alpha=8. / 9., ss_beta=np.sqrt(2),
                  limiter=1e-10, exclude_wake=True, superpositionModel=None, rotorAvgModel=None, groundModel=None,
                  upstream_only=False):
         BlockageDeficitModel.__init__(self, upstream_only=upstream_only, superpositionModel=superpositionModel,
@@ -27,6 +27,7 @@ class SelfSimilarityDeficit(BlockageDeficitModel):
         # limiter for singularities
         self.limiter = limiter
         self.exclude_wake = exclude_wake
+        self._a0 = a0
 
     def r12(self, x_ijlk):
         """
@@ -63,7 +64,7 @@ class SelfSimilarityDeficit(BlockageDeficitModel):
         BEM axial induction approximation by Madsen (1997). Here the effective
         CT is used instead, which is gamma*CT as shown in Eq. (8) in [1].
         """
-        return a0(self.ss_gamma * ct_ilk)[:, na]
+        return self._a0(self.ss_gamma * ct_ilk)[:, na]
 
     def _calc_layout_terms(self, dw_ijlk, cw_ijlk, D_src_il, **_):
         # radial shape function
@@ -115,7 +116,7 @@ class SelfSimilarityDeficit2020(SelfSimilarityDeficit):
         [1] N. Troldborg, A.R. Meyer Fortsing, Wind Energy, 2016
     """
 
-    def __init__(self, ss_alpha=8. / 9., ss_beta=np.sqrt(2),
+    def __init__(self, a0=madsen_a0, ss_alpha=8. / 9., ss_beta=np.sqrt(2),
                  r12p=np.array([-0.672, 0.4897]),
                  ngp=np.array([-1.381, 2.627, -1.524, 1.336]),
                  fgp=np.array([-0.06489, 0.4911, 1.116, -0.1577]),
@@ -134,6 +135,7 @@ class SelfSimilarityDeficit2020(SelfSimilarityDeficit):
         # limiter for singularities
         self.limiter = limiter
         self.exclude_wake = exclude_wake
+        self._a0 = a0
 
     def r12(self, x_ijlk):
         """
@@ -174,7 +176,7 @@ class SelfSimilarityDeficit2020(SelfSimilarityDeficit):
         CT is used instead, which is gamma*CT as shown in Eq. (8) in [1].
         """
         gamma_ct_ijlk = self.gamma(x_ijlk, ct_ilk) * ct_ilk[:, na]
-        return a0(gamma_ct_ijlk)
+        return self._a0(gamma_ct_ijlk)
 
     def gamma(self, x_ijlk, ct_ilk):
         """

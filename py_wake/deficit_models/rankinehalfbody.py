@@ -3,7 +3,7 @@ from numpy import newaxis as na
 from py_wake.deficit_models import DeficitModel
 from py_wake.deficit_models import BlockageDeficitModel
 from py_wake.utils.gradients import hypot
-from py_wake.deficit_models.utils import a0
+from py_wake.deficit_models.utils import madsen_a0
 import warnings
 
 
@@ -17,7 +17,7 @@ class RankineHalfBody(BlockageDeficitModel):
             induction and wind farm blockage - Technical Paper, Frazer-Nash Consultancy, 2019
     """
 
-    def __init__(self, limiter=1e-10, exclude_wake=True, superpositionModel=None,
+    def __init__(self, a0=madsen_a0, limiter=1e-10, exclude_wake=True, superpositionModel=None,
                  rotorAvgModel=None, groundModel=None, upstream_only=False):
         BlockageDeficitModel.__init__(self, upstream_only=upstream_only, superpositionModel=superpositionModel,
                                       rotorAvgModel=rotorAvgModel, groundModel=groundModel)
@@ -26,6 +26,7 @@ class RankineHalfBody(BlockageDeficitModel):
         # if used in a wind farm simulation, set deficit in wake region to
         # zero, as here the wake model is active
         self.exclude_wake = exclude_wake
+        self._a0 = a0
 
     def outside_body(self, WS_ilk, a0_ilk, R_il, dw_ijlk, cw_ijlk, r_ijlk):
         """
@@ -45,7 +46,7 @@ class RankineHalfBody(BlockageDeficitModel):
 
     def calc_deficit(self, WS_ilk, D_src_il, dw_ijlk, cw_ijlk, ct_ilk, **_):
         # source strength as given on p.7
-        a0_ilk = a0(ct_ilk)
+        a0_ilk = self._a0(ct_ilk)
         R_il = D_src_il / 2.
         m_ilk = 2. * WS_ilk * a0_ilk * np.pi * R_il[:, :, na]**2
         # radial distance
@@ -62,7 +63,7 @@ class RankineHalfBody(BlockageDeficitModel):
             deficit_ijlk = self.remove_wake(deficit_ijlk, dw_ijlk, cw_ijlk, D_src_il)
             # Close to the rotor the induced velocities become unphysical and are
             # limited to the induction in the rotor plane estimated by BEM.
-            induc = (WS_ilk * a0(ct_ilk))[:, na]
+            induc = (WS_ilk * self._a0(ct_ilk))[:, na]
             deficit_ijlk = np.where(deficit_ijlk > induc, induc * np.sign(deficit_ijlk), deficit_ijlk)
 
         return deficit_ijlk
