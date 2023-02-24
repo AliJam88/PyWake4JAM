@@ -57,8 +57,8 @@ class GCLHillDeflection(DeflectionModel):
         U_a_ijlkx = WS_eff_ilk[:, na, :, :, na] - 0.4 * U_w_ijlx * np.cos(theta_ilk)[:, na, :, :, na]
 
         deflection_ijlk = gradients.trapz(U_d_ijlkx / U_a_ijlkx, dw_ijlkx, axis=4)
-        self.hcw_ijlk = hcw_ijlk - deflection_ijlk * np.cos(theta_deflection_ilk[:, na])
-        self.dh_ijlk = dh_ijlk + deflection_ijlk * np.sin(theta_deflection_ilk[:, na])
+        self.hcw_ijlk = hcw_ijlk - np.sign(dw_ijlk) * deflection_ijlk * np.cos(theta_deflection_ilk[:, na])
+        self.dh_ijlk = dh_ijlk + np.sign(dw_ijlk) * deflection_ijlk * np.sin(theta_deflection_ilk[:, na])
         return dw_ijlk, self.hcw_ijlk, self.dh_ijlk
 
 
