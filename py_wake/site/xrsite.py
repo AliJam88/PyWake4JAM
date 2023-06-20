@@ -259,14 +259,22 @@ class XRSite(Site):
         return xr_site
 
     @classmethod
-    def from_pywasp_pwc(cls, pwc, **kwargs):
-        """Instanciate XRSite from a pywasp predicted wind climate (PWC) xr.Dataset
+    def from_pywasp_pwc(cls, pwc, method='park', drop_vars=[], **kwargs):
+        """Instantiate XRSite from a pywasp predicted wind climate (PWC) xr.Dataset or from 
+        New European Wind Atlas predicted wind climate xr.Dataset.
 
         Parameters
         ----------
         pwc : xr.Dataset
             pywasp predicted wind climate dataset. At a minimum should contain
             "A", "k", and "wdfreq".
+        method : str
+            method of establishing speedups. should be either 'park' or 'global_weibull'. 
+            the 'park' method calculates speedups based on the maximum sector-wise mean wind speeds. this method is
+            used for calculation of aep with wasp/pywasp using the park model, and not for calculting aep with pywake.
+            the 'global_weibull' calculates speedups based on the mean of the most central weibull for each sector.
+        drop_vars : list of str
+            list of not needed variable names to be removed
 
         """
         pwc = pwc.copy()
@@ -275,6 +283,11 @@ class XRSite(Site):
         for coord in ["sector_floor", "sector_ceil", "crs"]:
             if coord in pwc.coords:
                 pwc = pwc.drop_vars(coord)
+        
+        # Drop variables that are not needed
+        for var in drop_vars:
+            if var in pwc.data_vars:
+                pwc = pwc.drop_vars(var)
 
         # Get the spatial dims
         if "point" in pwc.dims:
@@ -292,8 +305,15 @@ class XRSite(Site):
         ws_mean = xr.apply_ufunc(
             weibull.mean, pwc["A"], pwc["k"], dask="allowed"
         )
-
-        pwc["Speedup"] = ws_mean / ws_mean.max(dim=xy_dims)
+        
+        if method == 'park':
+            pwc["Speedup"] = ws_mean / ws_mean.max(dim=xy_dims)
+        elif method == 'global_weibull':
+            median = pwc.median(["west_east", "south_north"])
+            pwc["Speedup"] = ws_mean / xr.apply_ufunc(weibull.mean, median["A"], median["k"], dask="allowed") 
+            pwc = pwc.drop_vars(['A', 'k'])
+            pwc['A'] = (['height', 'sector'],  median['A'].values)
+            pwc['k'] = (['height', 'sector'],  median['k'].values)
 
         # Add TI if not already present
         for var in ["turbulence_intensity"]:
