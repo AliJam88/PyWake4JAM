@@ -1,9 +1,5 @@
 from py_wake.site.wasp_grid_site import WaspGridSite, load_wasp_grd
-
-directory = 'C:/Users/jama/Desktop/ersonal/PyWake-master/py_wake/examples/data/AJ_ParqueFicticio/'
-
-from directory import ParqueFicticio_path
-
+from py_wake.examples.data.ParqueFicticio import ParqueFicticio_path
 from py_wake import np
 from py_wake.site.distance import TerrainFollowingDistance
 
