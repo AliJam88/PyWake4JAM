@@ -247,7 +247,7 @@ def load_wasp_grd(path, globstr='*.grd', speedup_using_pickle=True):
 
 def main():
     if __name__ == '__main__':
-        from py_wake.examples.data.ParqueFicticio import ParqueFicticio_path
+        from py_wake.ParqueFicticio import ParqueFicticio_path
         import matplotlib.pyplot as plt
         site = WaspGridSite.from_wasp_grd(ParqueFicticio_path, speedup_using_pickle=False)
         x, y = site.ds.x.values, site.ds.y.values
