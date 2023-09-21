@@ -1,9 +1,9 @@
 from py_wake.site.wasp_grid_site import WaspGridSite, load_wasp_grd
-# from py_wake.examples.data.AJ_ParqueFicticio import ParqueFicticio_path
+from py_wake.examples.data.ParqueFicticio import ParqueFicticio_path
 from py_wake import np
 from py_wake.site.distance import TerrainFollowingDistance
 
-ParqueFicticio_path = "py_wake/examples/data/AJ_ParqueFicticio"
+# ParqueFicticio_path = "py_wake/examples/data/AJ_ParqueFicticio"
 
 """
 min x: 262878
