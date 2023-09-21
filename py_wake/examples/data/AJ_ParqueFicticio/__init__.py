@@ -1,6 +1,6 @@
 import os
 # ParqueFicticio_path = os.path.dirname(__file__) + "/"
-# ParqueFicticio_path = "py_wake/examples/data/AJ_ParqueFicticio"
+ParqueFicticio_path = "py_wake/examples/data/AJ_ParqueFicticio"
 
 
 #ParqueFicticio_path = os.path.dirname(os.path.abspath("__file__")) + "/"
