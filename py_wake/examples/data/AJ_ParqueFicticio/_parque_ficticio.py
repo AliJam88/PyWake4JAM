@@ -1,4 +1,4 @@
-from py_wake.site.wasp_grid_site import WaspGridSite, load_wasp_grd
+from py_wake.site.AJ_wasp_grid_site import WaspGridSite, load_wasp_grd
 from py_wake.examples.data.AJ_ParqueFicticio import AJ_ParqueFicticio_path
 from py_wake import np
 from py_wake.site.distance import TerrainFollowingDistance
