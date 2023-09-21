@@ -8,4 +8,4 @@ AJ_ParqueFicticio_path = os.path.dirname(__file__) + "/"
 #ParqueFicticio_path = os.path.join(os.path.dirname(__file__), 'AJ_ParqueFicticio/')
 print(AJ_ParqueFicticio_path )
 
-from ._parque_ficticio import ParqueFicticioSite  # nopep8
+from ._parque_ficticio import AJ_ParqueFicticioSite  # nopep8
