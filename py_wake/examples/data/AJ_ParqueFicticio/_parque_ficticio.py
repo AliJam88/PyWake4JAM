@@ -21,7 +21,7 @@ rows: 33
 
 class ParqueFicticioSite(WaspGridSite):
     def __init__(self, distance=TerrainFollowingDistance(distance_resolution=2000), mode='valid'):
-        ds = load_wasp_grd(ParqueFicticio_path, speedup_using_pickle=False)
+        ds = load_wasp_grd(ParqueFicticio_path, speedup_using_pickle=True)
         WaspGridSite.__init__(self, ds, distance, mode)
         self.initial_position = np.array([
             [263655.0, 6506601.0],
